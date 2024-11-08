@@ -100,7 +100,7 @@ resultdiv = longDivMod(a, b, w)
 
 print(f"Число 1: {hex(hex_num1)}")
 print(f"Число 2: {hex(hex_num2)}")
-#print(f"Для мене:{hex(d)}")
+#print(f"Для мене:{hex(d)}")hgc
 print(f"Результат додавання: {[hex(x) for x in resultsum]}")
 #print(f"Перенос: {hex(carry)}")
 print(f"Результат віднімання: {[hex(x) for x in resultsub]}")
