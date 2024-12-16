@@ -1,4 +1,5 @@
 import math
+import timeit
 def killLastDigit(a, n):
     t=len(a)
     c=[0]*(t-n)
@@ -15,9 +16,22 @@ def barretReduction(x, n, m, w):
     r=sub(x, p, w)
     while longCmp(r, n)>=0:
         r=sub(r, n, w)
-        print(r)
     return r
 
+
+def barretReductionmu(x, n, w):
+    k=len(b)*2
+    m=longShiftDigitsToHigh([1], k)
+    m=longDivMod(mu, b, w)
+    k=len(n)
+    q=killLastDigit(x, k-1)
+    q=mul(q, m, w)
+    q=killLastDigit(q, k+1)
+    p=mul(q, n, w)
+    r=sub(x, p, w)
+    while longCmp(r, n)>=0:
+        r=sub(r, n, w)
+    return r
 def add1(a, b, w):
     n = max(len(a), len(b))
     c = [0] * (n + 1)  
@@ -120,11 +134,11 @@ def longCmp(a, b):
             return -1
     return 0  
 
-def longDivMod(a, b, w):
+def longDivModost(a, b, w):
 
     k = len(b)
     r = a  
-    q = 0  
+    q = [0]*(len(a)-len(b)+2)  
     
     while longCmp(r, b)==1 or longCmp(r, b)==0:
         t = len(r)
@@ -135,11 +149,37 @@ def longDivMod(a, b, w):
             c = longShiftDigitsToHigh(b, t - k)
            
         r = sub(r, c, w)
-        q = q + pow(65536, t-k)  
-    q=hex(q)[2:]  
-    q = hexTo16bit(q)
+        
+        q[-(t-k+1)] = q[-(t-k+1)] + 1
+    while len(q) > 1 and q[0] == 0:
+        q.pop(0)   
+  
+
 
     return q, r
+def longDivMod(a, b, w):
+
+    k = len(b)
+    r = a  
+    q = [0]*(len(a)-len(b)+2)  
+    
+    while longCmp(r, b)==1 or longCmp(r, b)==0:
+        t = len(r)
+        c = longShiftDigitsToHigh(b, t - k)  
+
+        if longCmp(r, c)==-1:
+            t = t - 1
+            c = longShiftDigitsToHigh(b, t - k)
+           
+        r = sub(r, c, w)
+        
+        q[-(t-k+1)] = q[-(t-k+1)] + 1
+    while len(q) > 1 and q[0] == 0:
+        q.pop(0)   
+  
+
+
+    return q
 
 '''def gcdlong (a, b, w):
     d=1
@@ -209,21 +249,22 @@ def gcdlong (a, b, w):
     while a[-1]%2==0:
         a=longDivMod(a, [2], w)
         
-    
+    c=1
     
     while longCmp(b, [0])==1 and longCmp(a, b)!=0 :
         while b[-1]%2==0:
             b=longDivMod(b, [2], w)
-            
-        
+    
         if longCmp(a, b)==1:
             min=b
-            a=sub(a, b, w)
+            a=barretReductionmu(a, b, w) 
+                
             a, b = b, a
             
         elif longCmp(a, b)==-1:
             min=a
-            b=sub(b, a, w)
+            b=barretReductionmu(b, a, w)
+        
             
             
     #print(min)
@@ -231,42 +272,30 @@ def gcdlong (a, b, w):
     d = hexTo16bit(d)
     d=mul(d, min, w)
     return d    
-def lcmlong(a, b, w):
+
+    
+def lcmlong(a, b, w, resultgcd):
     c=mul(a, b, w)
-    d=gcdlong(a, b, w)
+    d=resultgcd
     f=longDivMod(c, d, w)
     return f
 
-def amodn(a, n, w):
-   while longCmp(a, n)==1:
-       a=sub(a, n,w)
-   return a
-
-def addmod(a, b, n, w):
+def addmod(a, b, n, mu, w):
     c=add1(a, b, w)
-    k=len(n)*2
-    mu=longShiftDigitsToHigh([1], k)
-    mu=longDivMod(mu, n, w)
     c=barretReduction(c, n, mu, w)
     return c
 
-def submod(a, b, n, w):
+def submod(a, b, n, mu, w):
     c=sub(a, b, w)
-    k=len(n)*2
-    mu=longShiftDigitsToHigh([1], k)
-    mu=longDivMod(mu, n, w)
     c=barretReduction(c, n, mu, w)
     return c
 
-def mulmod(a, b, n, w):
+def mulmod(a, b, n, mu,  w):
     c=mul(a, b, w)
-    k=len(n)*2
-    mu=longShiftDigitsToHigh([1], k)
-    mu=longDivMod(mu, n, w)
     c=barretReduction(c, n, mu, w)
     return c
 
-def sqmod(a, n, w):
+def sqmod(a, n, mu, w):
     c=mul(a, a, w)
     k=len(n)*2
     mu=longShiftDigitsToHigh([1], k)
@@ -279,16 +308,14 @@ def sqmodmu(a, n, mu, w):
     c=barretReduction(c, n, mu, w)
     return c
 
-def longModPowerBarrett(a, b, n, w):
+def longModPowerBarrett(a, b, n, mu, w):
     c=[1]
-    k=len(n)*2
-    mu=longShiftDigitsToHigh([1], k)
-    mu=longDivMod(mu, n, w)
     p=len(b)
     for i in range(p-1, -1, -1):
         if b[i]=='1':
-            c=mulmod(c, a, n, w) 
-        a=sqmodmu(a, n, mu, w)
+            c=mulmod(c, a, n, mu,  w) 
+            print(c, a)
+        a=sqmod(a, n, mu, w)
     return c
 
 
@@ -298,15 +325,16 @@ def hexTo16bit(hex_str):
     return [int(hex_str[i:i+4], 16) for i in range(0, len(hex_str), 4)]
 
 
-
 hex_num1 = 0xc9c95a1c5b959df0e2283c9a3a06426955a83daf35afc88883ee2665fb28ade1cf927c551db2fd3277a1310c9fdd258a4d7e8c7854b106938b9ab15a3570989e142d66ad0248e393f3aa77e3d7048a4240d6a9a969e1c3386b4f4edeecdf4cf1655960f3c1b7318c68154cda535bce1a9f8f0685ecaaadb42a299dc4da90ebfa
 hex_num2 = 0xa40facc13cdf7169ced90eea3d5943bf2077933ba8e4419a36e3481fbd108636908a791f13307f9f4525c3d670e08e9b8265a84561d20c615c70f5a16057b0f5
 hex_num3 = 0xefec64f6f415234dacdaeb3bac4d448964527de1cff5414bb79397e3fce5dfe2b8ba751f0a36ff4504c042e61836499a7407862365f8fcc17f71038ffd030b41f3796edd03916614947b9c041f133480b18dd2e3360fb57bf56b91c3fc42a90fe08b5224b6e091405813bf32c9ac4950fb8e203a36fc888f856783370a57b317
 
 
+
 '''hex_num1 = 0x3
 hex_num2 = 0x15
 hex_num3 = 0x5'''
+
 hex_str1 = hex(hex_num1)[2:]  
 hex_str2 = hex(hex_num2)[2:]  
 hex_str3 = hex(hex_num3)[2:] 
@@ -316,15 +344,17 @@ b = hexTo16bit(hex_str2)
 n = hexTo16bit(hex_str3) 
 
 w = 16
-
+binary_num = bin(int(hex_str2, 16))[2:]  
+print(binary_num)
 #print(binary_num)
 
 k=len(b)*2
 mu=longShiftDigitsToHigh([1], k)
-mu=longDivMod(mu, n, w)
+mu=longDivMod(mu, b, w)
 print(f"Число 1: {hex(hex_num1)}")
 print(f"Число 2: {hex(hex_num2)}")
-
+'''execution_time = timeit.timeit(lambda: gcdlong(a, b, w), number=1)
+print(f"Час виконання: {execution_time}")'''
 resultsum = add1(a, b, w)
 resultsum= ''.join(format(x, 'x') for x in resultsum) 
 print(f"Результат додавання: {resultsum}")
@@ -335,20 +365,19 @@ resultmult = mul(a, b, w)
 resultmult= ''.join(format(x, 'x') for x in resultmult) 
 print(f"Результат множення: {resultmult}")
 
-resultdiv, r= longDivMod(a, b, w)
+resultdiv, r= longDivModost(a, b, w)
 resultdiv= ''.join(format(x, 'x') for x in resultdiv)
 r= ''.join(format(x, 'x') for x in r)
 print(f"Результат ділення: {resultdiv}")
 print(f"Остача: {r}")
  
-resulutamodb=amodn(a, b, w)
-resulutamodb= ''.join(format(x, 'x') for x in resulutamodb)
-print(f"Результат ділення: {resulutamodb}")
-resulrgcd=gcdlong(a, b, w)
+
+
+resulrgcd=gcdlong(a, b,  w)
 resulrgcd= ''.join(format(x, 'x') for x in resulrgcd)
 print(f"НСД: {resulrgcd}")
-
-resultlcm=lcmlong(a, b, w)
+resulrgcd=hexTo16bit(resulrgcd)
+resultlcm=lcmlong(a, b, w, resulrgcd)
 resultlcm= ''.join(format(x, 'x') for x in resultlcm)
 print(f"НСК: {resultlcm}")
 
@@ -356,22 +385,25 @@ resultbarret=barretReduction(a, b, mu, w)
 resultbarret=''.join(format(x, 'x') for x in resultbarret)
 print(f"А за модулем В при використанні редукції:{resultbarret}")
 
-resultaddmod=addmod(a, b, n, w)
+k=len(n)*2
+mu=longShiftDigitsToHigh([1], k)
+mu=longDivMod(mu, n, w)
+resultaddmod=addmod(a, b, n, mu, w)
 resultaddmod= ''.join(format(x, 'x') for x in resultaddmod)
 print(f"А + B за модулем :{resultaddmod}")
 
-resultsub=submod(a, b, n, w)
+resultsub=submod(a, b, n, mu, w)
 resultsub= ''.join(format(x, 'x') for x in resultsub)
 print(f"А - B за модулем :{resultsub}")
 
-resultmulmod=mulmod(a, b, n, w)
+resultmulmod=mulmod(a, b, n, mu, w)
 resultmulmod= ''.join(format(x, 'x') for x in resultmulmod)
 print(f"А * B за модулем :{resultmulmod}")
 
-resultsqmod=sqmod(a, n, w)
+resultsqmod=sqmod(a, n, mu, w)
 resultsqmod= ''.join(format(x, 'x') for x in resultsqmod)
 print(f"А^2 за модулем :{resultsqmod}")
 
-resultlongmod=longModPowerBarrett(a, binary_num, n, w)
+resultlongmod=longModPowerBarrett(a, binary_num, n, mu, w)
 resultlongmod= ''.join(format(x, 'x') for x in resultlongmod)
 print(f"А^B за модулем N:{resultlongmod}")

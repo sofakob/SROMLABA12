@@ -86,7 +86,7 @@ def mul(a, b, w):
         c=add1(c, temp3, w)
     while len(c) > 1 and c[0] == 0:
         c.pop(0)
-    c= ''.join(format(x, 'x') for x in c) 
+    
     return c
 
 def longDivMod(a, b, w):
@@ -146,6 +146,7 @@ resultsub= sub(a, b, w)
 resultsub= ''.join(format(x, 'x') for x in resultsub)
 print(f"Результат віднімання: {resultsub}")
 resultmult = mul(a, b, w)
+resultmult= ''.join(format(x, 'x') for x in resultmult) 
 print(f"Результат множення: {resultmult}")
 resultdiv = longDivMod(a, b, w)
 print(f"Результат ділення: {resultdiv}")
